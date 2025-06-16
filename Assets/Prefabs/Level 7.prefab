@@ -3724,7 +3724,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1443938631614552122, guid: bc4a535e2bf92f240abc2efba509c408, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.98
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1443938631614552122, guid: bc4a535e2bf92f240abc2efba509c408, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3808,6 +3808,10 @@ PrefabInstance:
       propertyPath: bodyVertical
       value: 
       objectReference: {fileID: 7028616704906629411, guid: 20aaeabf16d0f114588df93e8cb6c449, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: faceRenderer
+      value: 
+      objectReference: {fileID: 4465683197750137111}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: straightBody
       value: 
@@ -3945,6 +3949,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9129fccf27c9f344982702fa869fd955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!212 &4465683197750137111 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7176103376193679515, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+  m_PrefabInstance: {fileID: 6804920574114177420}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6526428279895436114 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 359558737958636254, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}

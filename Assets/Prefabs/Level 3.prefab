@@ -3511,6 +3511,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 7028616704906629411, guid: 20aaeabf16d0f114588df93e8cb6c449, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: faceRenderer
+      value: 
+      objectReference: {fileID: 1428727050040219294}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: straightBody
       value: 
       objectReference: {fileID: 7028616704906629411, guid: 20aaeabf16d0f114588df93e8cb6c449, type: 3}
@@ -3631,6 +3635,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+--- !u!212 &1428727050040219294 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7176103376193679515, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+  m_PrefabInstance: {fileID: 8090012693813192197}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &3351458854526179784 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6829631581003202509, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}

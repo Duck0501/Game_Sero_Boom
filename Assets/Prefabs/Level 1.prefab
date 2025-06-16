@@ -3150,6 +3150,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 7028616704906629411, guid: 20aaeabf16d0f114588df93e8cb6c449, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: faceRenderer
+      value: 
+      objectReference: {fileID: 4134442814919458949}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: straightBody
       value: 
       objectReference: {fileID: 7028616704906629411, guid: 20aaeabf16d0f114588df93e8cb6c449, type: 3}
@@ -3286,6 +3290,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9129fccf27c9f344982702fa869fd955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!212 &4134442814919458949 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7176103376193679515, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+  m_PrefabInstance: {fileID: 6554665819739107358}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6776704754590956224 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 359558737958636254, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}

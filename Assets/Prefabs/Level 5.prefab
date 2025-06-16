@@ -3407,7 +3407,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1491276774430106453, guid: ce0d6a9a9a8ede44595558f19b8d3c98, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.65
+      value: 2.68
       objectReference: {fileID: 0}
     - target: {fileID: 1491276774430106453, guid: ce0d6a9a9a8ede44595558f19b8d3c98, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3740,6 +3740,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 7028616704906629411, guid: 20aaeabf16d0f114588df93e8cb6c449, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: faceRenderer
+      value: 
+      objectReference: {fileID: 3560576641672108631}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: cornerTopLeft
       value: 
       objectReference: {fileID: 4130640169021434097, guid: 950ed7304c918044faa5249ec2add8a1, type: 3}
@@ -3852,6 +3856,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9129fccf27c9f344982702fa869fd955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!212 &3560576641672108631 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7176103376193679515, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+  m_PrefabInstance: {fileID: 5980518171548461772}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6197649435141578770 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 359558737958636254, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}

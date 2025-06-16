@@ -11,6 +11,9 @@ public class SnakeController : MonoBehaviour
     public GameObject snakeHead;
     public GameObject snakeBody;
     public GameObject snakeTail;
+    public GameObject faceMouthObject;
+    public GameObject pushEffect1;
+    public GameObject pushEffect2;
     public Tilemap[] groundTilemaps;
     public Tilemap[] wallTilemaps;
     public int bodyLength = 4;
@@ -36,6 +39,14 @@ public class SnakeController : MonoBehaviour
     public Sprite cornerBottomLeft;
     public Sprite cornerBottomRight;
 
+    public SpriteRenderer faceRenderer;
+    public Sprite faceNormal;
+    public Sprite faceEatBanana;
+    public Sprite faceFallFruit;
+    public Sprite faceFallOffMap;
+    public Sprite faceTakeMedicine;
+    public Sprite faceTakeMedicinePush;
+
     private bool canMove = true;
     private bool isFalling = false;
 
@@ -43,7 +54,10 @@ public class SnakeController : MonoBehaviour
     private int medicineCount;
 
     private HashSet<GameObject> processedItems = new HashSet<GameObject>();
-    private bool isTransitioning = false; 
+    private Coroutine faceResetCoroutine;
+    private bool isTransitioning = false;
+    private bool suppressMouthTemporarily = false;
+    private Coroutine pushEffectHideCoroutine;
 
     public void Start()
     {
@@ -68,6 +82,8 @@ public class SnakeController : MonoBehaviour
         SpriteRenderer headSr = snakeHead.GetComponent<SpriteRenderer>();
         if (headSr == null) headSr = snakeHead.AddComponent<SpriteRenderer>();
         headSr.sprite = head;
+
+        faceRenderer = snakeHead.transform.Find("face")?.GetComponent<SpriteRenderer>();
 
         Vector3 spawnDir = Vector3.up;
         for (int i = 0; i < bodyLength; i++)
@@ -117,7 +133,8 @@ public class SnakeController : MonoBehaviour
         directionHistory.Clear();
         processedItems.Clear();
         isTransitioning = false;
-        Start(); 
+        Start();
+        SetHeadFace(faceNormal);
     }
 
     void Update()
@@ -127,6 +144,29 @@ public class SnakeController : MonoBehaviour
             Vector3 moveDir = Vector3.zero;
             float rotationZ = GetRotationZ(currentDirection);
             Direction newDirection = currentDirection;
+
+            if (canMove && !isFalling && faceResetCoroutine == null) 
+            {
+                Vector3[] checkDirs = { Vector3.up, Vector3.down, Vector3.left, Vector3.right };
+                bool foundNearbyFruit = false;
+
+                foreach (var dir in checkDirs)
+                {
+                    Vector3 checkPos = snakeHead.transform.position + dir * 0.5f; 
+                    Collider2D[] hits = Physics2D.OverlapCircleAll(checkPos, 0.1f);
+                    foreach (var hit in hits)
+                    {
+                        if (hit.CompareTag("Banana") || hit.CompareTag("Medicine"))
+                        {
+                            foundNearbyFruit = true;
+                            break;
+                        }
+                    }
+                    if (foundNearbyFruit) break;
+                }
+
+                SetFaceMouthActive(foundNearbyFruit);
+            }
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
@@ -500,76 +540,108 @@ public class SnakeController : MonoBehaviour
 
         processedItems.Add(banana);
         Destroy(banana);
+        SetFaceMouthActive(false);
+        suppressMouthTemporarily = true;
+        StartCoroutine(UnsuppressMouthAfterDelay(1f));
+        SetHeadFaceTemporary(faceEatBanana, 1f);
     }
 
     private IEnumerator EatMedicineCoroutine(GameObject medicine)
     {
         if (processedItems.Contains(medicine))
-        {
             yield break;
-        }
-
-        Direction pushDirection = GetOppositeDirection(currentDirection);
-        float rotationZ = GetRotationZ(pushDirection);
-        Vector2 currentHeadPosition = snakeHead.transform.position;
-
-        while (true)
-        {
-            Vector3 newHeadPosition = (Vector3)currentHeadPosition + GetMovementStep(pushDirection);
-            positionHistory[0] = newHeadPosition;
-            snakeHead.transform.position = newHeadPosition;
-            snakeHead.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
-
-            for (int i = 1; i < bodyParts.Count; i++)
-            {
-                Vector3 newBodyPosition = bodyParts[i].position + GetMovementStep(pushDirection);
-                positionHistory[i] = newBodyPosition;
-                bodyParts[i].position = newBodyPosition;
-            }
-
-            directionHistory[0] = pushDirection;
-            for (int i = 1; i < directionHistory.Count; i++)
-            {
-                directionHistory[i] = directionHistory[i - 1];
-            }
-
-            UpdateTailRotation();
-            currentHeadPosition = newHeadPosition;
-
-            bool collisionDetected = false;
-            foreach (Transform part in bodyParts)
-            {
-                Collider2D[] hitColliders = Physics2D.OverlapCircleAll(part.position, 0.2f);
-                foreach (Collider2D collider in hitColliders)
-                {
-                    if (collider.CompareTag("Wall") || collider.CompareTag("Medicine") || collider.CompareTag("Banana"))
-                    {
-                        collisionDetected = true;
-                        break;
-                    }
-                }
-                if (collisionDetected) break;
-            }
-
-            if (collisionDetected)
-            {
-                break;
-            }
-
-            yield return null;
-        }
-
-        if (medicineCount > 0)
-        {
-            medicineCount--;
-        }
 
         processedItems.Add(medicine);
         Destroy(medicine);
+
+        if (medicineCount > 0)
+            medicineCount--;
+
+        Direction pushDirection = GetOppositeDirection(currentDirection);
+        float rotationZ = GetRotationZ(pushDirection);
+        Vector3 moveStep = GetMovementStep(pushDirection);
+
+        GameObject draggedBanana = null;
+
+        while (true)
+        {
+            SetHeadFace(faceTakeMedicinePush);
+            List<Vector3> nextSnakePositions = bodyParts.Select(part => part.position + moveStep).ToList();
+
+            bool blocked = false;
+
+            for (int i = 0; i < nextSnakePositions.Count; i++)
+            {
+                Vector3 nextPos = nextSnakePositions[i];
+
+                if (IsCollidingWithAnyWall(nextPos))
+                {
+                    blocked = true;
+                    break;
+                }
+
+                Collider2D[] hits = Physics2D.OverlapCircleAll(nextPos, 0.1f);
+                foreach (var hit in hits)
+                {
+                    if (hit.CompareTag("Medicine"))
+                    {
+                        blocked = true;
+                        break;
+                    }
+
+                    if (hit.CompareTag("Banana"))
+                    {
+                        Vector3 bananaNextPos = hit.transform.position + moveStep;
+                        if (IsCollidingWithAnyWall(bananaNextPos))
+                        {
+                            blocked = true;
+                            break;
+                        }
+
+                        if (draggedBanana == null)
+                        {
+                            draggedBanana = hit.gameObject;
+                        }
+                    }
+                }
+
+                if (blocked)
+                    break;
+            }
+
+            if (blocked)
+                break;
+
+            levelManager.snakeParent.transform.position += moveStep;
+
+            if (draggedBanana != null)
+            {
+                draggedBanana.transform.position += moveStep;
+            }
+
+            for (int i = 0; i < positionHistory.Count; i++)
+            {
+                positionHistory[i] += moveStep;
+            }
+
+            directionHistory.Insert(0, pushDirection);
+            if (directionHistory.Count > bodyParts.Count + 1)
+                directionHistory.RemoveAt(directionHistory.Count - 1);
+
+            UpdateTailRotation();
+
+            yield return new WaitForSeconds(0.15f);
+        }
+        canMove = true;
+        SetPushEffectsActive(false);
+        SetHeadFace(faceNormal);
     }
 
     void EatMedicine(GameObject medicine)
     {
+        canMove = false;
+        SetHeadFace(faceTakeMedicine);
+        SetPushEffectsActive(true);
         StartCoroutine(EatMedicineCoroutine(medicine));
     }
 
@@ -623,11 +695,13 @@ public class SnakeController : MonoBehaviour
 
     void StartFallingBanana(GameObject banana)
     {
+        SetHeadFaceTemporary(faceFallFruit, 1f);
         StartCoroutine(FallRoutineBanana(banana));
     }
 
     void StartFallingMedicine(GameObject medicine)
     {
+        SetHeadFaceTemporary(faceFallFruit, 1f);
         StartCoroutine(FallRoutineMedicine(medicine));
     }
 
@@ -654,6 +728,7 @@ public class SnakeController : MonoBehaviour
     void StartFalling()
     {
         isFalling = true;
+        SetHeadFace(faceFallOffMap);
         StartCoroutine(FallRoutine());
     }
 
@@ -668,5 +743,77 @@ public class SnakeController : MonoBehaviour
             }
             yield return new WaitForSeconds(0.1f);
         }
+    }
+
+    private void SetHeadFace(Sprite faceSprite)
+    {
+        if (faceRenderer != null && faceSprite != null)
+        {
+            faceRenderer.sprite = faceSprite;
+        }
+    }
+
+    private void SetHeadFaceTemporary(Sprite faceSprite, float delay)
+    {
+        if (faceRenderer != null && faceSprite != null)
+        {
+            faceRenderer.sprite = faceSprite;
+
+            if (faceResetCoroutine != null)
+            {
+                StopCoroutine(faceResetCoroutine);
+            }
+            faceResetCoroutine = StartCoroutine(ResetFaceAfterDelay(delay));
+        }
+    }
+
+    private IEnumerator ResetFaceAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SetHeadFace(faceNormal);
+    }
+
+    private void SetPushEffectsActive(bool isActive)
+    {
+        if (isActive)
+        {
+            if (pushEffect1 != null) pushEffect1.SetActive(true);
+            if (pushEffect2 != null) pushEffect2.SetActive(true);
+
+            if (pushEffectHideCoroutine != null)
+            {
+                StopCoroutine(pushEffectHideCoroutine);
+                pushEffectHideCoroutine = null;
+            }
+        }
+        else
+        {
+            if (pushEffectHideCoroutine == null)
+            {
+                pushEffectHideCoroutine = StartCoroutine(HidePushEffectsAfterDelay(0.3f));
+            }
+        }
+    }
+
+    private IEnumerator HidePushEffectsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (pushEffect1 != null) pushEffect1.SetActive(false);
+        if (pushEffect2 != null) pushEffect2.SetActive(false);
+
+        pushEffectHideCoroutine = null;
+    }
+
+    private void SetFaceMouthActive(bool isActive)
+    {
+        if (faceMouthObject != null)
+            faceMouthObject.SetActive(isActive);
+    }
+
+    private IEnumerator UnsuppressMouthAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        suppressMouthTemporarily = false;
     }
 }
