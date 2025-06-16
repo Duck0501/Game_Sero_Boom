@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Banana
   - Medicine
+  - Ground
+  - Wall
+  - Hole
   layers:
   - Default
   - TransparentFX

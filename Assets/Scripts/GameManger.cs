@@ -2,37 +2,49 @@
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameManger : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
     public Button buttonPlay, buttonHelp, buttonToHome, buttonReset;
-    public Button buttonLeft, buttonRight, buttonUp, buttonDown, buttonUndo;
+    private LevelManager levelManager; 
 
     void Start()
     {
+        levelManager = FindObjectOfType<LevelManager>();
+
         if (buttonPlay != null)
+        {
             buttonPlay.onClick.AddListener(() => SceneManager.LoadScene("Play"));
+        }
 
         if (buttonHelp != null)
+        {
             buttonHelp.onClick.AddListener(() => SceneManager.LoadScene("Help"));
+        }
 
         if (buttonToHome != null)
+        {
             buttonToHome.onClick.AddListener(() => SceneManager.LoadScene("Home"));
+        }
 
         if (buttonReset != null)
-            buttonReset.onClick.AddListener(ResetScene);
+        {
+            buttonReset.onClick.AddListener(ResetCurrentLevel);
+        }
     }
 
     void Update()
     {
-        // Khi nhấn phím R, cũng reset scene
         if (Input.GetKeyDown(KeyCode.R))
         {
-            ResetScene();
+            ResetCurrentLevel();
         }
     }
 
-    void ResetScene()
+    void ResetCurrentLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (levelManager != null)
+        {
+            levelManager.LoadLevel(levelManager.currentLevelIndex); 
+        }
     }
 }

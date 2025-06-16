@@ -25,7 +25,7 @@ public class SnakeController : MonoBehaviour
     private List<Direction> directionHistory = new List<Direction>();
     private Dictionary<GameObject, Vector2> bananaPositions;
     private Dictionary<GameObject, Vector2> medicinePositions;
-    private LevelManager levelManager; // Tham chiếu đến LevelManager
+    private LevelManager levelManager;
 
     public Sprite head;
     public Sprite endBody;
@@ -39,19 +39,28 @@ public class SnakeController : MonoBehaviour
     private bool canMove = true;
     private bool isFalling = false;
 
-    void Start()
+    private int bananaCount;
+    private int medicineCount;
+
+    private HashSet<GameObject> processedItems = new HashSet<GameObject>();
+    private bool isTransitioning = false; 
+
+    public void Start()
     {
         bananaPositions = new Dictionary<GameObject, Vector2>();
         medicinePositions = new Dictionary<GameObject, Vector2>();
-        levelManager = FindObjectOfType<LevelManager>(); // Tìm LevelManager trong cảnh
+        levelManager = FindObjectOfType<LevelManager>();
 
-        Vector3 lastPos = snakeHead.transform.position;
+        Vector3 lastPos = transform.position;
         positionHistory.Add(lastPos);
         directionHistory.Add(currentDirection);
         bodyParts.Add(snakeHead.transform);
 
-        GameObject parentObject = new GameObject("SnakeParent");
-        snakeHead.transform.SetParent(parentObject.transform);
+        if (GameObject.Find("SnakeParent") == null)
+        {
+            levelManager.snakeParent = new GameObject("SnakeParent");
+        }
+        snakeHead.transform.SetParent(levelManager.snakeParent.transform);
 
         BoxCollider2D headCollider = snakeHead.AddComponent<BoxCollider2D>();
         headCollider.size = new Vector2(moveStepX, moveStepY);
@@ -60,12 +69,12 @@ public class SnakeController : MonoBehaviour
         if (headSr == null) headSr = snakeHead.AddComponent<SpriteRenderer>();
         headSr.sprite = head;
 
-        Vector3 spawnDir = Vector3.up; // Thân và đuôi ở trên đầu
+        Vector3 spawnDir = Vector3.up;
         for (int i = 0; i < bodyLength; i++)
         {
             lastPos += spawnDir * moveStepY;
             GameObject bodyPart = Instantiate(snakeBody, lastPos, Quaternion.identity);
-            bodyPart.transform.SetParent(parentObject.transform);
+            bodyPart.transform.SetParent(levelManager.snakeParent.transform);
             BoxCollider2D bodyCollider = bodyPart.AddComponent<BoxCollider2D>();
             bodyCollider.size = new Vector2(moveStepX, moveStepY);
             SpriteRenderer sr = bodyPart.GetComponent<SpriteRenderer>();
@@ -78,7 +87,7 @@ public class SnakeController : MonoBehaviour
 
         lastPos += spawnDir * moveStepY;
         GameObject tailPart = Instantiate(snakeTail, lastPos, Quaternion.identity);
-        tailPart.transform.SetParent(parentObject.transform);
+        tailPart.transform.SetParent(levelManager.snakeParent.transform);
         BoxCollider2D tailCollider = tailPart.AddComponent<BoxCollider2D>();
         tailCollider.size = new Vector2(moveStepX, moveStepY);
         SpriteRenderer tailSr = tailPart.GetComponent<SpriteRenderer>();
@@ -89,6 +98,26 @@ public class SnakeController : MonoBehaviour
         directionHistory.Add(currentDirection);
 
         UpdateTailRotation();
+
+        if (levelManager != null && levelManager.currentLevelIndex >= 0 && levelManager.currentLevelIndex < levelManager.bananaCountsPerLevel.Length)
+        {
+            bananaCount = levelManager.bananaCountsPerLevel[levelManager.currentLevelIndex];
+            medicineCount = levelManager.medicineCountsPerLevel[levelManager.currentLevelIndex];
+        }
+    }
+
+    public void ResetSnake()
+    {
+        foreach (Transform child in levelManager.snakeParent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        bodyParts.Clear();
+        positionHistory.Clear();
+        directionHistory.Clear();
+        processedItems.Clear();
+        isTransitioning = false;
+        Start(); 
     }
 
     void Update()
@@ -283,18 +312,6 @@ public class SnakeController : MonoBehaviour
         }
     }
 
-    Vector3 GetOppositeMovementStep(Direction dir)
-    {
-        switch (dir)
-        {
-            case Direction.Up: return Vector3.down * moveStepY;
-            case Direction.Down: return Vector3.up * moveStepY;
-            case Direction.Left: return Vector3.right * moveStepX;
-            case Direction.Right: return Vector3.left * moveStepX;
-            default: return Vector3.zero;
-        }
-    }
-
     bool WillCollideWithBody(Vector2 headPosition)
     {
         foreach (Transform bodyPart in bodyParts.GetRange(1, bodyParts.Count - 1))
@@ -309,7 +326,22 @@ public class SnakeController : MonoBehaviour
 
     bool IsCollidingWithAnyWall(Vector2 position)
     {
-        return wallTilemaps.Any(wall => wall.HasTile(wall.WorldToCell(position)));
+        if (wallTilemaps == null || wallTilemaps.Length == 0) return false;
+        return wallTilemaps.Any(wall => wall != null && wall.HasTile(wall.WorldToCell(position)));
+    }
+
+    bool IsOnAnyGround()
+    {
+        if (groundTilemaps == null || groundTilemaps.Length == 0) return false;
+        foreach (Vector3 pos in positionHistory)
+        {
+            bool onGround = groundTilemaps.Any(ground => ground != null && ground.HasTile(ground.WorldToCell(pos)));
+            if (onGround)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void UpdateTailRotation()
@@ -368,13 +400,17 @@ public class SnakeController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Banana"))
+        if (other.CompareTag("Banana") && !processedItems.Contains(other.gameObject))
         {
             PushBanana(other.gameObject);
         }
-        else if (other.CompareTag("Medicine"))
+        else if (other.CompareTag("Medicine") && !processedItems.Contains(other.gameObject))
         {
             PushMedicine(other.gameObject);
+        }
+        else if (other.CompareTag("Hole") && !isTransitioning)
+        {
+            CheckWinCondition();
         }
     }
 
@@ -426,6 +462,13 @@ public class SnakeController : MonoBehaviour
 
     void EatBanana(GameObject banana)
     {
+        if (processedItems.Contains(banana))
+        {
+            return;
+        }
+
+        Vector2 headPositionBefore = snakeHead.transform.position;
+
         int tailIndex = bodyParts.Count - 1;
         Vector2 tailPosition = bodyParts[tailIndex].position;
         Vector2 previousPosition = (tailIndex > 0) ? bodyParts[tailIndex - 1].position : bodyParts[0].position;
@@ -450,27 +493,127 @@ public class SnakeController : MonoBehaviour
         bodyParts[tailIndex + 1].position = newTailPosition;
         positionHistory[tailIndex + 1] = newTailPosition;
 
-        if (levelManager != null)
+        if (bananaCount > 0)
         {
-            levelManager.OnItemEaten("Banana"); // Thông báo cho LevelManager
+            bananaCount--;
         }
+
+        processedItems.Add(banana);
         Destroy(banana);
+    }
+
+    private IEnumerator EatMedicineCoroutine(GameObject medicine)
+    {
+        if (processedItems.Contains(medicine))
+        {
+            yield break;
+        }
+
+        Direction pushDirection = GetOppositeDirection(currentDirection);
+        float rotationZ = GetRotationZ(pushDirection);
+        Vector2 currentHeadPosition = snakeHead.transform.position;
+
+        while (true)
+        {
+            Vector3 newHeadPosition = (Vector3)currentHeadPosition + GetMovementStep(pushDirection);
+            positionHistory[0] = newHeadPosition;
+            snakeHead.transform.position = newHeadPosition;
+            snakeHead.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+
+            for (int i = 1; i < bodyParts.Count; i++)
+            {
+                Vector3 newBodyPosition = bodyParts[i].position + GetMovementStep(pushDirection);
+                positionHistory[i] = newBodyPosition;
+                bodyParts[i].position = newBodyPosition;
+            }
+
+            directionHistory[0] = pushDirection;
+            for (int i = 1; i < directionHistory.Count; i++)
+            {
+                directionHistory[i] = directionHistory[i - 1];
+            }
+
+            UpdateTailRotation();
+            currentHeadPosition = newHeadPosition;
+
+            bool collisionDetected = false;
+            foreach (Transform part in bodyParts)
+            {
+                Collider2D[] hitColliders = Physics2D.OverlapCircleAll(part.position, 0.2f);
+                foreach (Collider2D collider in hitColliders)
+                {
+                    if (collider.CompareTag("Wall") || collider.CompareTag("Medicine") || collider.CompareTag("Banana"))
+                    {
+                        collisionDetected = true;
+                        break;
+                    }
+                }
+                if (collisionDetected) break;
+            }
+
+            if (collisionDetected)
+            {
+                break;
+            }
+
+            yield return null;
+        }
+
+        if (medicineCount > 0)
+        {
+            medicineCount--;
+        }
+
+        processedItems.Add(medicine);
+        Destroy(medicine);
     }
 
     void EatMedicine(GameObject medicine)
     {
-        if (levelManager != null)
-        {
-            levelManager.OnItemEaten("Medicine"); // Thông báo cho LevelManager
-        }
-        Destroy(medicine);
+        StartCoroutine(EatMedicineCoroutine(medicine));
     }
+
+    private void CheckWinCondition()
+    {
+        if (!isTransitioning && bananaCount <= 0 && medicineCount <= 0 && levelManager != null)
+        {
+            isTransitioning = true; 
+            int nextLevelIndex = levelManager.currentLevelIndex + 1;
+            if (nextLevelIndex < levelManager.levelPrefabs.Length)
+            {
+                levelManager.LoadLevel(nextLevelIndex);
+                bananaCount = levelManager.bananaCountsPerLevel[nextLevelIndex];
+                medicineCount = levelManager.medicineCountsPerLevel[nextLevelIndex];
+                processedItems.Clear();
+                isTransitioning = false; 
+            }
+            else
+            {
+                Debug.Log("All levels completed!");
+                isTransitioning = false;
+            }
+        }
+    }
+
+    private Direction GetOppositeDirection(Direction dir)
+    {
+        switch (dir)
+        {
+            case Direction.Up: return Direction.Down;
+            case Direction.Down: return Direction.Up;
+            case Direction.Left: return Direction.Right;
+            case Direction.Right: return Direction.Left;
+            default: return Direction.Down;
+        }
+    }
+
 
     bool IsOnAnyGroundForBanana(Vector2 position)
     {
+        if (groundTilemaps == null || groundTilemaps.Length == 0) return false;
         foreach (Tilemap ground in groundTilemaps)
         {
-            if (ground.HasTile(ground.WorldToCell(position)))
+            if (ground != null && ground.HasTile(ground.WorldToCell(position)))
             {
                 return true;
             }
@@ -506,19 +649,6 @@ public class SnakeController : MonoBehaviour
             medicine.transform.position += Vector3.down * fallSpeed;
             yield return new WaitForSeconds(0.1f);
         }
-    }
-
-    bool IsOnAnyGround()
-    {
-        foreach (Vector3 pos in positionHistory)
-        {
-            bool onGround = groundTilemaps.Any(ground => ground.HasTile(ground.WorldToCell(pos)));
-            if (onGround)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     void StartFalling()
