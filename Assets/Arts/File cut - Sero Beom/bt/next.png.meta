@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 81a40bd4fb9793f4c826083549a46558
+guid: 15b8cacbce9b045498f47f0cf436ebdd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3647641104816625866
-    second: pu guide_0
+      213: -123058118157912311
+    second: next_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 190
+  spritePixelsToUnits: 287
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pu guide_0
+      name: next_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 2366
-        height: 1122
+        width: 403
+        height: 403
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ac855b042460f9230800000000000000
-      internalID: 3647641104816625866
+      spriteID: 90738742b4fca4ef0800000000000000
+      internalID: -123058118157912311
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      pu guide_0: 3647641104816625866
+      next_0: -123058118157912311
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

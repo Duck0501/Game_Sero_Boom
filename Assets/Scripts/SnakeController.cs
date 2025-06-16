@@ -14,6 +14,9 @@ public class SnakeController : MonoBehaviour
     public GameObject faceMouthObject;
     public GameObject pushEffect1;
     public GameObject pushEffect2;
+    public GameObject holeObject;
+    public GameObject canvasWin;
+    public GameObject canvasLose;
     public Tilemap[] groundTilemaps;
     public Tilemap[] wallTilemaps;
     public int bodyLength = 4;
@@ -38,7 +41,8 @@ public class SnakeController : MonoBehaviour
     public Sprite cornerTopLeft;
     public Sprite cornerBottomLeft;
     public Sprite cornerBottomRight;
-
+    public Sprite holeClosedSprite;
+    public Sprite holeOpenSprite;
     public SpriteRenderer faceRenderer;
     public Sprite faceNormal;
     public Sprite faceEatBanana;
@@ -115,7 +119,8 @@ public class SnakeController : MonoBehaviour
 
         UpdateTailRotation();
 
-        if (levelManager != null && levelManager.currentLevelIndex >= 0 && levelManager.currentLevelIndex < levelManager.bananaCountsPerLevel.Length)
+        if (levelManager != null && levelManager.currentLevelIndex >= 0 &&
+            levelManager.currentLevelIndex < levelManager.bananaCountsPerLevel.Length)
         {
             bananaCount = levelManager.bananaCountsPerLevel[levelManager.currentLevelIndex];
             medicineCount = levelManager.medicineCountsPerLevel[levelManager.currentLevelIndex];
@@ -145,14 +150,14 @@ public class SnakeController : MonoBehaviour
             float rotationZ = GetRotationZ(currentDirection);
             Direction newDirection = currentDirection;
 
-            if (canMove && !isFalling && faceResetCoroutine == null) 
+            if (canMove && !isFalling && faceResetCoroutine == null)
             {
                 Vector3[] checkDirs = { Vector3.up, Vector3.down, Vector3.left, Vector3.right };
                 bool foundNearbyFruit = false;
 
                 foreach (var dir in checkDirs)
                 {
-                    Vector3 checkPos = snakeHead.transform.position + dir * 0.5f; 
+                    Vector3 checkPos = snakeHead.transform.position + dir * 0.5f;
                     Collider2D[] hits = Physics2D.OverlapCircleAll(checkPos, 0.1f);
                     foreach (var hit in hits)
                     {
@@ -462,7 +467,7 @@ public class SnakeController : MonoBehaviour
         Vector2 pushDirection = GetMovementStep(currentDirection).normalized;
         Vector2 newBananaPosition = (Vector2)banana.transform.position + pushDirection * new Vector2(gridSize2X, gridSize2Y);
 
-        if (IsCollidingWithAnyWall(newBananaPosition))
+        if (IsCollidingWithAnyWall(newBananaPosition) || IsCollidingWithSnakeBody(newBananaPosition))
         {
             EatBanana(banana);
         }
@@ -485,7 +490,7 @@ public class SnakeController : MonoBehaviour
         Vector2 pushDirection = GetMovementStep(currentDirection).normalized;
         Vector2 newMedicinePosition = (Vector2)medicine.transform.position + pushDirection * new Vector2(gridSize2X, gridSize2Y);
 
-        if (IsCollidingWithAnyWall(newMedicinePosition))
+        if (IsCollidingWithAnyWall(newMedicinePosition) || IsCollidingWithSnakeBody(newMedicinePosition))
         {
             EatMedicine(medicine);
         }
@@ -540,6 +545,7 @@ public class SnakeController : MonoBehaviour
 
         processedItems.Add(banana);
         Destroy(banana);
+        UpdateHoleSpriteIfReady();
         SetFaceMouthActive(false);
         suppressMouthTemporarily = true;
         StartCoroutine(UnsuppressMouthAfterDelay(1f));
@@ -551,11 +557,12 @@ public class SnakeController : MonoBehaviour
         if (processedItems.Contains(medicine))
             yield break;
 
-        processedItems.Add(medicine);
-        Destroy(medicine);
-
         if (medicineCount > 0)
             medicineCount--;
+
+        processedItems.Add(medicine);
+        Destroy(medicine);
+        UpdateHoleSpriteIfReady();
 
         Direction pushDirection = GetOppositeDirection(currentDirection);
         float rotationZ = GetRotationZ(pushDirection);
@@ -649,7 +656,7 @@ public class SnakeController : MonoBehaviour
     {
         if (!isTransitioning && bananaCount <= 0 && medicineCount <= 0 && levelManager != null)
         {
-            isTransitioning = true; 
+            isTransitioning = true;
             int nextLevelIndex = levelManager.currentLevelIndex + 1;
             if (nextLevelIndex < levelManager.levelPrefabs.Length)
             {
@@ -657,11 +664,11 @@ public class SnakeController : MonoBehaviour
                 bananaCount = levelManager.bananaCountsPerLevel[nextLevelIndex];
                 medicineCount = levelManager.medicineCountsPerLevel[nextLevelIndex];
                 processedItems.Clear();
-                isTransitioning = false; 
+                isTransitioning = false;
             }
             else
             {
-                Debug.Log("All levels completed!");
+                if (canvasWin != null) canvasWin.SetActive(true);
                 isTransitioning = false;
             }
         }
@@ -696,12 +703,14 @@ public class SnakeController : MonoBehaviour
     void StartFallingBanana(GameObject banana)
     {
         SetHeadFaceTemporary(faceFallFruit, 1f);
+        if (canvasLose != null) canvasLose.SetActive(true);
         StartCoroutine(FallRoutineBanana(banana));
     }
 
     void StartFallingMedicine(GameObject medicine)
     {
         SetHeadFaceTemporary(faceFallFruit, 1f);
+        if (canvasLose != null) canvasLose.SetActive(true);
         StartCoroutine(FallRoutineMedicine(medicine));
     }
 
@@ -730,6 +739,11 @@ public class SnakeController : MonoBehaviour
         isFalling = true;
         SetHeadFace(faceFallOffMap);
         StartCoroutine(FallRoutine());
+
+        if (canvasLose != null)
+        {
+            canvasLose.SetActive(true);
+        }
     }
 
     IEnumerator FallRoutine()
@@ -815,5 +829,29 @@ public class SnakeController : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         suppressMouthTemporarily = false;
+    }
+
+    private void UpdateHoleSpriteIfReady()
+    {
+        if (bananaCount <= 0 && medicineCount <= 0 && holeObject != null && holeOpenSprite != null)
+        {
+            var sr = holeObject.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.sprite = holeOpenSprite;
+            }
+        }
+    }
+
+    private bool IsCollidingWithSnakeBody(Vector2 position)
+    {
+        for (int i = 1; i < bodyParts.Count; i++) 
+        {
+            if (Vector2.Distance(position, bodyParts[i].position) < 0.1f)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

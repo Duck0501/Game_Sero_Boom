@@ -4,7 +4,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public Button buttonPlay, buttonHelp, buttonToHome, buttonReset;
+    public Button buttonPlay, buttonHelp, buttonToHome, 
+        buttonReset, buttonRestartFromLevel1, buttonNextLevel;
     private LevelManager levelManager; 
 
     void Start()
@@ -30,6 +31,16 @@ public class GameManager : MonoBehaviour
         {
             buttonReset.onClick.AddListener(ResetCurrentLevel);
         }
+
+        if (buttonRestartFromLevel1 != null)
+        {
+            buttonRestartFromLevel1.onClick.AddListener(RestartFromLevel1);
+        }
+
+        if (buttonNextLevel != null)
+        {
+            buttonNextLevel.onClick.AddListener(GoToNextLevel);
+        }
     }
 
     void Update()
@@ -45,6 +56,26 @@ public class GameManager : MonoBehaviour
         if (levelManager != null)
         {
             levelManager.LoadLevel(levelManager.currentLevelIndex); 
+        }
+    }
+
+    void RestartFromLevel1()
+    {
+        if (levelManager != null)
+        {
+            levelManager.LoadLevel(0); 
+        }
+    }
+
+    void GoToNextLevel()
+    {
+        if (levelManager != null)
+        {
+            int nextIndex = levelManager.currentLevelIndex + 1;
+            if (nextIndex < levelManager.levelPrefabs.Length)
+            {
+                levelManager.LoadLevel(nextIndex);
+            }
         }
     }
 }

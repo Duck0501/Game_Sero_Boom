@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+using DG.Tweening;
+using System.Collections;
 using System.Linq;
 using UnityEngine.Tilemaps;
 
@@ -10,6 +11,9 @@ public class LevelManager : MonoBehaviour
     private GameObject currentLevel;
     private SnakeController snakeController;
     public GameObject snakeParent;
+
+    public RectTransform panelLeft;
+    public RectTransform panelRight;
 
     public int[] bananaCountsPerLevel;
     public int[] medicineCountsPerLevel;
@@ -43,7 +47,8 @@ public class LevelManager : MonoBehaviour
 
         if (currentLevel != null)
         {
-            Destroy(currentLevel);
+            StartCoroutine(HideLevelThenLoadNext(currentLevel, index));
+            return;
         }
 
         currentLevel = Instantiate(levelPrefabs[index], Vector3.zero, Quaternion.identity);
@@ -69,5 +74,58 @@ public class LevelManager : MonoBehaviour
 
         Vector3 startPosition = new Vector3(0, 0, 0);
         snakeController.transform.position = startPosition;
+    }
+
+    private IEnumerator HideLevelThenLoadNext(GameObject levelToHide, int nextIndex)
+    {
+        float duration = 0.1f;
+        float delayStep = 0.1f;
+
+        SpriteRenderer[] renderers = levelToHide.GetComponentsInChildren<SpriteRenderer>();
+        var sorted = renderers.OrderBy(r => r.transform.position.x).ToList();
+
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var sr = sorted[i];
+            sr.transform.DOScaleX(0f, duration).SetEase(Ease.InOutSine).SetDelay(i * delayStep);
+        }
+
+        float totalDelay = sorted.Count * delayStep + duration;
+        yield return new WaitForSeconds(totalDelay);
+
+        yield return StartCoroutine(PlayTransitionPanels());
+
+        Destroy(levelToHide);
+        LoadLevel(nextIndex);
+
+        yield return StartCoroutine(HideTransitionPanels());
+    }
+
+    private IEnumerator PlayTransitionPanels()
+    {
+        float moveTime = 0.8f;
+        panelLeft.gameObject.SetActive(true);
+        panelRight.gameObject.SetActive(true);
+
+        panelLeft.anchoredPosition = new Vector2(-Screen.width, 0);
+        panelRight.anchoredPosition = new Vector2(Screen.width, 0);
+
+        panelLeft.DOAnchorPos(Vector2.zero, moveTime).SetEase(Ease.InOutSine);
+        panelRight.DOAnchorPos(Vector2.zero, moveTime).SetEase(Ease.InOutSine);
+
+        yield return new WaitForSeconds(moveTime);
+    }
+
+    private IEnumerator HideTransitionPanels()
+    {
+        float moveTime = 1f;
+
+        panelLeft.DOAnchorPos(new Vector2(-Screen.width, 0), moveTime).SetEase(Ease.InOutSine);
+        panelRight.DOAnchorPos(new Vector2(Screen.width, 0), moveTime).SetEase(Ease.InOutSine);
+
+        yield return new WaitForSeconds(moveTime);
+
+        panelLeft.gameObject.SetActive(false);
+        panelRight.gameObject.SetActive(false);
     }
 }
