@@ -6,7 +6,9 @@ public class GameManager : MonoBehaviour
 {
     public Button buttonPlay, buttonHelp, buttonToHome, 
         buttonReset, buttonRestartFromLevel1, buttonNextLevel;
-    private LevelManager levelManager; 
+    private LevelManager levelManager;
+    public GameObject canvasWin;
+    public GameObject canvasLose;
 
     void Start()
     {
@@ -48,6 +50,12 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetCurrentLevel();
+        }
+        if (buttonNextLevel != null)
+        {
+            bool isWinShown = canvasWin != null && canvasWin.activeSelf;
+            bool isLoseShown = canvasLose != null && canvasLose.activeSelf;
+            buttonNextLevel.interactable = !(isWinShown || isLoseShown);
         }
     }
 

@@ -50,6 +50,8 @@ MonoBehaviour:
   buttonReset: {fileID: 2081926353694493854}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 7612339988400363000}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 2365193806743058364}
 --- !u!1 &191233880641295597
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +747,8 @@ MonoBehaviour:
   buttonReset: {fileID: 5742425952283893682}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 0}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 0}
 --- !u!1 &2830589845613988115
 GameObject:
   m_ObjectHideFlags: 0
@@ -893,7 +897,7 @@ Transform:
   m_GameObject: {fileID: 3147375279047220716}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.7, y: 1.4745997, z: 0}
+  m_LocalPosition: {x: 0.7, y: 1.51, z: 0}
   m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -4463,6 +4467,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -8447811444475969441, guid: 34bc90f11a14d4d4785103e768dd317f, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: fallClip
+      value: 
+      objectReference: {fileID: 8300000, guid: f424e8f6d956059409a2436dda2fb601, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: pushClip
+      value: 
+      objectReference: {fileID: 8300000, guid: c6b342434c275e04ebec2ddf21d8c8b9, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: snakeBody
       value: 
       objectReference: {fileID: 8758858307684406587, guid: 8d654d4a3a3125e4691725abcce7f3ad, type: 3}
@@ -4490,6 +4502,10 @@ PrefabInstance:
       propertyPath: holeObject
       value: 
       objectReference: {fileID: 6410028916001511571}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: eatItemClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 82c83128fc77bd144bc3c548848cb9a5, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: bodyVertical
       value: 

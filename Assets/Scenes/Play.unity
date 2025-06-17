@@ -228,8 +228,8 @@ MonoBehaviour:
   - {fileID: 2823932468829052643, guid: 578aeeaabf593b44fb13de6685b6f868, type: 3}
   - {fileID: 296659498694272816, guid: 239079dc6267dc44e822c041f4d7e047, type: 3}
   - {fileID: 6527336786921444189, guid: 10cec793fd2a6bb44a66c3b2ba33c59f, type: 3}
-  - {fileID: 3680998234413283248, guid: eaed292d9abfe0246b1397314b9a84b5, type: 3}
   - {fileID: 4059169320748537717, guid: 19426bacc2ac63540a150c87b2a23900, type: 3}
+  - {fileID: 3680998234413283248, guid: eaed292d9abfe0246b1397314b9a84b5, type: 3}
   - {fileID: 4247672632598536881, guid: 0c16ea80b7054814183c2c0359e8a1f7, type: 3}
   - {fileID: 8499397377200920346, guid: 4b78d5cc9d645cb48918bce949f7ec60, type: 3}
   - {fileID: 6885320162422448257, guid: 955b59592e4626646bea9fa285c77f82, type: 3}
@@ -244,8 +244,8 @@ MonoBehaviour:
   snakeParent: {fileID: 0}
   panelLeft: {fileID: 813719286}
   panelRight: {fileID: 135536260}
-  bananaCountsPerLevel: 010000000000000000000000050000000500000000000000000000000100000001000000010000000300000000000000010000000300000004000000
-  medicineCountsPerLevel: 000000000400000003000000010000000000000001000000010000000100000001000000010000000300000001000000010000000100000001000000
+  bananaCountsPerLevel: 010000000000000000000000050000000500000000000000000000000100000001000000020000000300000000000000010000000300000004000000
+  medicineCountsPerLevel: 000000000400000003000000000000000100000001000000010000000100000001000000010000000300000001000000010000000100000001000000
 --- !u!4 &418035772
 Transform:
   m_ObjectHideFlags: 0
@@ -273,7 +273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9129fccf27c9f344982702fa869fd955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snakeHead: {fileID: 0}
+  snakeHead: {fileID: 6829631581003202509, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
   snakeBody: {fileID: 0}
   snakeTail: {fileID: 0}
   faceMouthObject: {fileID: 0}
@@ -288,6 +288,8 @@ MonoBehaviour:
   gridSize2X: 0.23
   gridSize2Y: 0.19
   head: {fileID: 0}
+  headHorizontal: {fileID: 0}
+  tailHorizontal: {fileID: 0}
   endBody: {fileID: 0}
   bodyHorizontal: {fileID: 0}
   bodyVertical: {fileID: 0}
@@ -297,13 +299,16 @@ MonoBehaviour:
   cornerBottomRight: {fileID: 0}
   holeClosedSprite: {fileID: 0}
   holeOpenSprite: {fileID: 0}
-  faceRenderer: {fileID: 0}
   faceNormal: {fileID: 0}
   faceEatBanana: {fileID: 0}
   faceFallFruit: {fileID: 0}
   faceFallOffMap: {fileID: 0}
   faceTakeMedicine: {fileID: 0}
   faceTakeMedicinePush: {fileID: 0}
+  faceRenderer: {fileID: 0}
+  eatItemClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  pushClip: {fileID: 0}
 --- !u!1 &610098999
 GameObject:
   m_ObjectHideFlags: 0
@@ -1438,6 +1443,8 @@ MonoBehaviour:
   buttonReset: {fileID: 0}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 0}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 0}
 --- !u!4 &1503559686
 Transform:
   m_ObjectHideFlags: 0

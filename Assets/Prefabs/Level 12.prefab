@@ -1664,6 +1664,8 @@ MonoBehaviour:
   buttonReset: {fileID: 7179336531199864993}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 0}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 0}
 --- !u!1 &5108701568287213455
 GameObject:
   m_ObjectHideFlags: 0
@@ -6023,6 +6025,8 @@ MonoBehaviour:
   buttonReset: {fileID: 4333105125774787135}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 3965367928754091839}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 4128542615319129023}
 --- !u!1 &7940456916189148535
 GameObject:
   m_ObjectHideFlags: 0
@@ -6149,6 +6153,8 @@ MonoBehaviour:
   buttonReset: {fileID: 2306928923014786088}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 0}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 0}
 --- !u!1 &8085580782867708299
 GameObject:
   m_ObjectHideFlags: 0
@@ -6374,6 +6380,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -8447811444475969441, guid: 34bc90f11a14d4d4785103e768dd317f, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: fallClip
+      value: 
+      objectReference: {fileID: 8300000, guid: f424e8f6d956059409a2436dda2fb601, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: pushClip
+      value: 
+      objectReference: {fileID: 8300000, guid: c6b342434c275e04ebec2ddf21d8c8b9, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: snakeBody
       value: 
       objectReference: {fileID: 8758858307684406587, guid: 8d654d4a3a3125e4691725abcce7f3ad, type: 3}
@@ -6387,7 +6401,7 @@ PrefabInstance:
       objectReference: {fileID: 4667856337637638144, guid: 2ed1739efa9585a4588602ea1ac6109e, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: bodyLength
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: canvasLose
@@ -6401,6 +6415,10 @@ PrefabInstance:
       propertyPath: holeObject
       value: 
       objectReference: {fileID: 8185136733795964674}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: eatItemClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 82c83128fc77bd144bc3c548848cb9a5, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: bodyVertical
       value: 

@@ -8,15 +8,8 @@ public class SnakeController : MonoBehaviour
 {
     private enum Direction { Up, Down, Left, Right }
 
-    public GameObject snakeHead;
-    public GameObject snakeBody;
-    public GameObject snakeTail;
-    public GameObject faceMouthObject;
-    public GameObject pushEffect1;
-    public GameObject pushEffect2;
-    public GameObject holeObject;
-    public GameObject canvasWin;
-    public GameObject canvasLose;
+    public GameObject snakeHead, snakeBody, snakeTail, faceMouthObject, 
+        pushEffect1, pushEffect2, holeObject, canvasWin, canvasLose;
     public Tilemap[] groundTilemaps;
     public Tilemap[] wallTilemaps;
     public int bodyLength = 4;
@@ -33,38 +26,29 @@ public class SnakeController : MonoBehaviour
     private Dictionary<GameObject, Vector2> medicinePositions;
     private LevelManager levelManager;
 
-    public Sprite head;
-    public Sprite endBody;
-    public Sprite bodyHorizontal;
-    public Sprite bodyVertical;
-    public Sprite cornerTopRight;
-    public Sprite cornerTopLeft;
-    public Sprite cornerBottomLeft;
-    public Sprite cornerBottomRight;
-    public Sprite holeClosedSprite;
-    public Sprite holeOpenSprite;
+    public Sprite head, headHorizontal, tailHorizontal, endBody, 
+        bodyHorizontal, bodyVertical, cornerTopRight, cornerTopLeft, 
+        cornerBottomLeft, cornerBottomRight, holeClosedSprite, holeOpenSprite,
+        faceNormal, faceEatBanana, faceFallFruit, faceFallOffMap, faceTakeMedicine, faceTakeMedicinePush;
     public SpriteRenderer faceRenderer;
-    public Sprite faceNormal;
-    public Sprite faceEatBanana;
-    public Sprite faceFallFruit;
-    public Sprite faceFallOffMap;
-    public Sprite faceTakeMedicine;
-    public Sprite faceTakeMedicinePush;
+
+    public AudioClip eatItemClip, fallClip, pushClip;
+    private AudioSource audioSource;
 
     private bool canMove = true;
     private bool isFalling = false;
 
-    private int bananaCount;
-    private int medicineCount;
+    private int bananaCount, medicineCount;
 
     private HashSet<GameObject> processedItems = new HashSet<GameObject>();
-    private Coroutine faceResetCoroutine;
+    private Coroutine faceResetCoroutine, pushBackTimeoutCoroutine, pushEffectHideCoroutine;
     private bool isTransitioning = false;
     private bool suppressMouthTemporarily = false;
-    private Coroutine pushEffectHideCoroutine;
 
     public void Start()
     {
+        audioSource = gameObject.AddComponent<AudioSource>();
+
         bananaPositions = new Dictionary<GameObject, Vector2>();
         medicinePositions = new Dictionary<GameObject, Vector2>();
         levelManager = FindObjectOfType<LevelManager>();
@@ -144,7 +128,9 @@ public class SnakeController : MonoBehaviour
 
     void Update()
     {
-        if (!isFalling && canMove)
+        if (!isFalling && canMove && 
+            (canvasWin == null || !canvasWin.activeSelf) &&
+            (canvasLose == null || !canvasLose.activeSelf))
         {
             Vector3 moveDir = Vector3.zero;
             float rotationZ = GetRotationZ(currentDirection);
@@ -227,6 +213,15 @@ public class SnakeController : MonoBehaviour
                 snakeHead.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
                 currentDirection = newDirection;
 
+                var headSr = snakeHead.GetComponent<SpriteRenderer>();
+                if (headSr != null)
+                {
+                    if (newDirection == Direction.Left || newDirection == Direction.Right)
+                        headSr.sprite = headHorizontal;
+                    else
+                        headSr.sprite = head;
+                }
+
                 for (int i = 1; i < bodyParts.Count; i++)
                 {
                     int historyIndex = i;
@@ -256,6 +251,9 @@ public class SnakeController : MonoBehaviour
 
     public void MoveLeft()
     {
+        if (!canMove || isFalling ||
+        (canvasWin != null && canvasWin.activeSelf) ||
+        (canvasLose != null && canvasLose.activeSelf)) return;
         if (canMove && currentDirection != Direction.Right && !isFalling)
         {
             currentDirection = Direction.Left;
@@ -269,6 +267,9 @@ public class SnakeController : MonoBehaviour
 
     public void MoveRight()
     {
+        if (!canMove || isFalling ||
+        (canvasWin != null && canvasWin.activeSelf) ||
+        (canvasLose != null && canvasLose.activeSelf)) return;
         if (canMove && currentDirection != Direction.Left && !isFalling)
         {
             currentDirection = Direction.Right;
@@ -282,6 +283,9 @@ public class SnakeController : MonoBehaviour
 
     public void MoveDown()
     {
+        if (!canMove || isFalling ||
+        (canvasWin != null && canvasWin.activeSelf) ||
+        (canvasLose != null && canvasLose.activeSelf)) return;
         if (canMove && currentDirection != Direction.Up && !isFalling)
         {
             currentDirection = Direction.Down;
@@ -295,6 +299,9 @@ public class SnakeController : MonoBehaviour
 
     public void MoveUp()
     {
+        if (!canMove || isFalling ||
+        (canvasWin != null && canvasWin.activeSelf) ||
+        (canvasLose != null && canvasLose.activeSelf)) return;
         if (canMove && currentDirection != Direction.Down && !isFalling)
         {
             currentDirection = Direction.Up;
@@ -319,6 +326,15 @@ public class SnakeController : MonoBehaviour
         snakeHead.transform.position = newPosition;
         snakeHead.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
         currentDirection = newDirection;
+
+        SpriteRenderer headSr = snakeHead.GetComponent<SpriteRenderer>();
+        if (headSr != null)
+        {
+            if (newDirection == Direction.Left || newDirection == Direction.Right)
+                headSr.sprite = headHorizontal;
+            else
+                headSr.sprite = head;
+        }
 
         for (int i = 1; i < bodyParts.Count; i++)
         {
@@ -399,13 +415,17 @@ public class SnakeController : MonoBehaviour
         Vector3 directionToHead = beforeTail.position - tail.position;
         float angle = -90f;
 
+        SpriteRenderer tailSr = tail.GetComponent<SpriteRenderer>();
         if (Mathf.Abs(directionToHead.x) > Mathf.Abs(directionToHead.y))
         {
             angle = directionToHead.x > 0 ? 180f : 0f;
+            if (tailHorizontal != null)
+                tailSr.sprite = tailHorizontal;
         }
         else
         {
             angle = directionToHead.y > 0 ? -90f : 90f;
+            tailSr.sprite = endBody;
         }
 
         tail.localRotation = Quaternion.Euler(0f, 0f, angle);
@@ -530,7 +550,15 @@ public class SnakeController : MonoBehaviour
         newBodyCollider.size = new Vector2(moveStepX, moveStepY);
         SpriteRenderer sr = newBodyPart.GetComponent<SpriteRenderer>();
         if (sr == null) sr = newBodyPart.AddComponent<SpriteRenderer>();
-        sr.sprite = bodyVertical;
+        Vector2 tailDir = (tailPosition - previousPosition).normalized;
+        if (Mathf.Abs(tailDir.x) > Mathf.Abs(tailDir.y))
+        {
+            sr.sprite = bodyHorizontal;
+        }
+        else
+        {
+            sr.sprite = bodyVertical;
+        }
         bodyParts.Insert(tailIndex, newBodyPart.transform);
         positionHistory.Insert(tailIndex, tailPosition);
         directionHistory.Insert(tailIndex, directionHistory[tailIndex - 1]);
@@ -550,6 +578,7 @@ public class SnakeController : MonoBehaviour
         suppressMouthTemporarily = true;
         StartCoroutine(UnsuppressMouthAfterDelay(1f));
         SetHeadFaceTemporary(faceEatBanana, 1f);
+        audioSource.PlayOneShot(eatItemClip);
     }
 
     private IEnumerator EatMedicineCoroutine(GameObject medicine)
@@ -563,6 +592,9 @@ public class SnakeController : MonoBehaviour
         processedItems.Add(medicine);
         Destroy(medicine);
         UpdateHoleSpriteIfReady();
+        audioSource.clip = pushClip;
+        audioSource.loop = false;
+        audioSource.Play();
 
         Direction pushDirection = GetOppositeDirection(currentDirection);
         float rotationZ = GetRotationZ(pushDirection);
@@ -592,10 +624,17 @@ public class SnakeController : MonoBehaviour
                 {
                     if (hit.CompareTag("Medicine"))
                     {
-                        blocked = true;
-                        break;
+                        Vector3 medNextPos = hit.transform.position + moveStep;
+                        if (IsCollidingWithAnyWall(medNextPos))
+                        {
+                            blocked = true;
+                            break;
+                        }
+                        if (draggedBanana == null) 
+                        {
+                            draggedBanana = hit.gameObject;
+                        }
                     }
-
                     if (hit.CompareTag("Banana"))
                     {
                         Vector3 bananaNextPos = hit.transform.position + moveStep;
@@ -624,6 +663,10 @@ public class SnakeController : MonoBehaviour
             if (draggedBanana != null)
             {
                 draggedBanana.transform.position += moveStep;
+                if (draggedBanana.CompareTag("Banana"))
+                    StartCoroutine(CheckBananaFallAfterDelay(draggedBanana, 1f));
+                else if (draggedBanana.CompareTag("Medicine"))
+                    StartCoroutine(CheckMedicineFallAfterDelay(draggedBanana, 1f));
             }
 
             for (int i = 0; i < positionHistory.Count; i++)
@@ -640,6 +683,12 @@ public class SnakeController : MonoBehaviour
             yield return new WaitForSeconds(0.15f);
         }
         canMove = true;
+        if (pushBackTimeoutCoroutine != null)
+        {
+            StopCoroutine(pushBackTimeoutCoroutine);
+            pushBackTimeoutCoroutine = null;
+        }
+        audioSource.Stop();
         SetPushEffectsActive(false);
         SetHeadFace(faceNormal);
     }
@@ -649,7 +698,13 @@ public class SnakeController : MonoBehaviour
         canMove = false;
         SetHeadFace(faceTakeMedicine);
         SetPushEffectsActive(true);
+        if (pushBackTimeoutCoroutine != null)
+        {
+            StopCoroutine(pushBackTimeoutCoroutine);
+        }
+        pushBackTimeoutCoroutine = StartCoroutine(PushBackTimeoutCheck(5f));
         StartCoroutine(EatMedicineCoroutine(medicine));
+        audioSource.PlayOneShot(eatItemClip);
     }
 
     private void CheckWinCondition()
@@ -668,7 +723,10 @@ public class SnakeController : MonoBehaviour
             }
             else
             {
-                if (canvasWin != null) canvasWin.SetActive(true);
+                if (canvasWin != null)
+                {
+                    StartCoroutine(ShowCanvasAfterDelay(canvasWin, 1f));
+                }
                 isTransitioning = false;
             }
         }
@@ -703,15 +761,23 @@ public class SnakeController : MonoBehaviour
     void StartFallingBanana(GameObject banana)
     {
         SetHeadFaceTemporary(faceFallFruit, 1f);
-        if (canvasLose != null) canvasLose.SetActive(true);
+        if (canvasLose != null)
+        {
+            StartCoroutine(ShowCanvasAfterDelay(canvasLose, 1f));
+        }
         StartCoroutine(FallRoutineBanana(banana));
+        audioSource.PlayOneShot(fallClip);
     }
 
     void StartFallingMedicine(GameObject medicine)
     {
         SetHeadFaceTemporary(faceFallFruit, 1f);
-        if (canvasLose != null) canvasLose.SetActive(true);
+        if (canvasLose != null)
+        {
+            StartCoroutine(ShowCanvasAfterDelay(canvasLose, 1f));
+        }
         StartCoroutine(FallRoutineMedicine(medicine));
+        audioSource.PlayOneShot(fallClip);
     }
 
     IEnumerator FallRoutineBanana(GameObject banana)
@@ -739,10 +805,10 @@ public class SnakeController : MonoBehaviour
         isFalling = true;
         SetHeadFace(faceFallOffMap);
         StartCoroutine(FallRoutine());
-
+        audioSource.PlayOneShot(fallClip);
         if (canvasLose != null)
         {
-            canvasLose.SetActive(true);
+            StartCoroutine(ShowCanvasAfterDelay(canvasLose, 1f));
         }
     }
 
@@ -812,10 +878,8 @@ public class SnakeController : MonoBehaviour
     private IEnumerator HidePushEffectsAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-
         if (pushEffect1 != null) pushEffect1.SetActive(false);
         if (pushEffect2 != null) pushEffect2.SetActive(false);
-
         pushEffectHideCoroutine = null;
     }
 
@@ -853,5 +917,41 @@ public class SnakeController : MonoBehaviour
             }
         }
         return false;
+    }
+
+    private IEnumerator ShowCanvasAfterDelay(GameObject canvas, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        canvas.SetActive(true);
+    }
+    private IEnumerator CheckBananaFallAfterDelay(GameObject banana, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Vector2 bananaPos = banana.transform.position;
+        if (!IsOnAnyGroundForBanana(bananaPos))
+        {
+            StartFallingBanana(banana);
+        }
+    }
+    private IEnumerator CheckMedicineFallAfterDelay(GameObject medicine, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Vector2 medPos = medicine.transform.position;
+        if (!IsOnAnyGroundForBanana(medPos)) 
+        {
+            StartFallingMedicine(medicine);
+        }
+    }
+    private IEnumerator PushBackTimeoutCheck(float timeout)
+    {
+        yield return new WaitForSeconds(timeout);
+
+        if (!canMove && isFalling == false)
+        {
+            if (canvasLose != null)
+            {
+                canvasLose.SetActive(true);
+            }
+        }
     }
 }

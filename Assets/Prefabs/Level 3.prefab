@@ -524,6 +524,8 @@ MonoBehaviour:
   buttonReset: {fileID: 1234387073380600544}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 0}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 0}
 --- !u!1 &3394104661939667112
 GameObject:
   m_ObjectHideFlags: 0
@@ -2167,6 +2169,8 @@ MonoBehaviour:
   buttonReset: {fileID: 1745810878041638863}
   buttonRestartFromLevel1: {fileID: 0}
   buttonNextLevel: {fileID: 604793616414319785}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 3030706250168189631}
 --- !u!1 &4840672974370443981
 GameObject:
   m_ObjectHideFlags: 0
@@ -4157,6 +4161,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -8447811444475969441, guid: 34bc90f11a14d4d4785103e768dd317f, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: fallClip
+      value: 
+      objectReference: {fileID: 8300000, guid: f424e8f6d956059409a2436dda2fb601, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: pushClip
+      value: 
+      objectReference: {fileID: 8300000, guid: c6b342434c275e04ebec2ddf21d8c8b9, type: 3}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: snakeBody
       value: 
       objectReference: {fileID: 8758858307684406587, guid: 8d654d4a3a3125e4691725abcce7f3ad, type: 3}
@@ -4192,6 +4204,10 @@ PrefabInstance:
       propertyPath: holeObject
       value: 
       objectReference: {fileID: 5583207218880077780}
+    - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: eatItemClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 82c83128fc77bd144bc3c548848cb9a5, type: 3}
     - target: {fileID: -3974577259160525701, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: bodyVertical
       value: 
@@ -4312,6 +4328,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1152676070111077286, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5433589738828963284, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6050210831857865582, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6829631581003202509, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: m_Name
       value: head
@@ -4323,6 +4351,10 @@ PrefabInstance:
     - target: {fileID: 7123554285094910750, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8599536305468993706, guid: 1ff197e0526954f49865966fa0adcd3a, type: 3}
+      propertyPath: m_SortingOrder
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

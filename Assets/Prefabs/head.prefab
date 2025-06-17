@@ -75,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: -8624616599934999286, guid: 5d1433eef157b9040b100da27f623231, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -249,7 +249,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 4
   m_Sprite: {fileID: 102699859105068259, guid: 7b512c53f4e26414a94f52a5b4dca350, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -271,10 +271,10 @@ GameObject:
   m_Component:
   - component: {fileID: 359558737958636254}
   - component: {fileID: 36263293862478028}
+  - component: {fileID: 2574887691203974116}
   - component: {fileID: 7123554285094910750}
   - component: {fileID: 3550743112798795097}
   - component: {fileID: -3974577259160525701}
-  - component: {fileID: 2574887691203974116}
   m_Layer: 0
   m_Name: head
   m_TagString: Untagged
@@ -344,7 +344,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 6943535168657398750, guid: 4a4360d7c653fd34ab38d99924cf8240, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -356,6 +356,52 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &2574887691203974116
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6829631581003202509}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.00062540174, y: -0.0045814514}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.63414633, y: 0.5923345}
+    newSize: {x: 0.63414633, y: 0.5923345}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.54539293, y: 0.5021591}
+  m_EdgeRadius: 0
 --- !u!61 &7123554285094910750
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -390,7 +436,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0002642274, y: -0.0027885437}
+  m_Offset: {x: -0.0011387467, y: -0.0027885437}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -400,7 +446,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.6738211, y: 0.54564667}
+  m_Size: {x: 0.66157687, y: 0.54564667}
   m_EdgeRadius: 0
 --- !u!50 &3550743112798795097
 Rigidbody2D:
@@ -448,13 +494,17 @@ MonoBehaviour:
   pushEffect1: {fileID: 1152676070111077286}
   pushEffect2: {fileID: 6050210831857865582}
   holeObject: {fileID: 0}
+  canvasWin: {fileID: 0}
+  canvasLose: {fileID: 0}
   groundTilemaps: []
   wallTilemaps: []
   bodyLength: 4
   gridSize2X: 0.23
   gridSize2Y: 0.19
   head: {fileID: 0}
-  endBody: {fileID: 0}
+  headHorizontal: {fileID: -2104618798087158234, guid: 97d34a16f83bd624baa214e7b536fef6, type: 3}
+  tailHorizontal: {fileID: 4881822866616685885, guid: 44baad45e0c547a4ea792e10d3e605c6, type: 3}
+  endBody: {fileID: -6254662425824378823, guid: 7d36a5045c5f42948a804cd464daba90, type: 3}
   bodyHorizontal: {fileID: 0}
   bodyVertical: {fileID: 0}
   cornerTopRight: {fileID: 0}
@@ -463,59 +513,16 @@ MonoBehaviour:
   cornerBottomRight: {fileID: 0}
   holeClosedSprite: {fileID: 4714086112600628916, guid: 0749e851894a94b45b91ccc4747efb7e, type: 3}
   holeOpenSprite: {fileID: 8755195094526958396, guid: bb62f62aca52e9d49b7a49f3825c4030, type: 3}
-  faceRenderer: {fileID: 0}
   faceNormal: {fileID: 4606157284126940538, guid: e90d12c49878e8a4eb3935840bbb67d4, type: 3}
   faceEatBanana: {fileID: 6857209623859750507, guid: 25699da1f5f983847a6f63cc07704381, type: 3}
   faceFallFruit: {fileID: 8486320996559874079, guid: 48e27d0b0760af7438b618b13a4ca2aa, type: 3}
   faceFallOffMap: {fileID: -2489866051625185760, guid: 69370e91e795d954e8ed46ae4ad89d1b, type: 3}
   faceTakeMedicine: {fileID: -3258566519860392841, guid: bb8a68384c4714d49adb063a14fc6ae8, type: 3}
   faceTakeMedicinePush: {fileID: 8059832191998204515, guid: 0f081688a69a56547a5bcc7be967c517, type: 3}
---- !u!61 &2574887691203974116
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6829631581003202509}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0.0015000701, y: -0.0045814514}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.63414633, y: 0.5923345}
-    newSize: {x: 0.63414633, y: 0.5923345}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.54714227, y: 0.5021591}
-  m_EdgeRadius: 0
+  faceRenderer: {fileID: 0}
+  eatItemClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  pushClip: {fileID: 0}
 --- !u!1 &7413661494479702094
 GameObject:
   m_ObjectHideFlags: 0
