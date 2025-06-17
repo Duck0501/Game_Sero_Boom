@@ -40,92 +40,92 @@ public class LevelManager : MonoBehaviour
 
     public void LoadLevel(int index)
     {
-        if (index < 0 || index >= levelPrefabs.Length)
-        {
-            return;
-        }
+        if (index < 0 || index >= levelPrefabs.Length) return;
 
-        if (currentLevel != null)
-        {
-            StartCoroutine(HideLevelThenLoadNext(currentLevel, index));
-            return;
-        }
-
-        currentLevel = Instantiate(levelPrefabs[index], Vector3.zero, Quaternion.identity);
-        currentLevelIndex = index;
-
-        Tilemap[] groundTilemaps = currentLevel.GetComponentsInChildren<Tilemap>().Where(t => t.gameObject.tag == "Ground").ToArray();
-        Tilemap[] wallTilemaps = currentLevel.GetComponentsInChildren<Tilemap>().Where(t => t.gameObject.tag == "Wall").ToArray();
-        if (snakeController != null)
-        {
-            snakeController.groundTilemaps = groundTilemaps;
-            snakeController.wallTilemaps = wallTilemaps;
-            snakeController.ResetSnake(); 
-        }
-
-        if (snakeParent == null)
-        {
-            snakeParent = GameObject.Find("SnakeParent");
-            if (snakeParent == null)
-            {
-                snakeParent = new GameObject("SnakeParent");
-            }
-        }
-
-        Vector3 startPosition = new Vector3(0, 0, 0);
-        snakeController.transform.position = startPosition;
-    }
-
-    private IEnumerator HideLevelThenLoadNext(GameObject levelToHide, int nextIndex)
-    {
-        float duration = 0.1f;
-        float delayStep = 0.1f;
-
-        SpriteRenderer[] renderers = levelToHide.GetComponentsInChildren<SpriteRenderer>();
-        var sorted = renderers.OrderBy(r => r.transform.position.x).ToList();
-
-        for (int i = 0; i < sorted.Count; i++)
-        {
-            var sr = sorted[i];
-            sr.transform.DOScaleX(0f, duration).SetEase(Ease.InOutSine).SetDelay(i * delayStep);
-        }
-
-        float totalDelay = sorted.Count * delayStep + duration;
-        yield return new WaitForSeconds(totalDelay);
-
-        yield return StartCoroutine(PlayTransitionPanels());
-
-        Destroy(levelToHide);
-        LoadLevel(nextIndex);
-
-        yield return StartCoroutine(HideTransitionPanels());
+        StartCoroutine(TransitionLoadLevel(index));
     }
 
     private IEnumerator PlayTransitionPanels()
     {
         float moveTime = 0.8f;
+        float waitInMiddle = 1f;
+
         panelLeft.gameObject.SetActive(true);
         panelRight.gameObject.SetActive(true);
 
-        panelLeft.anchoredPosition = new Vector2(-Screen.width, 0);
-        panelRight.anchoredPosition = new Vector2(Screen.width, 0);
+        Vector2 leftStartPos = panelLeft.anchoredPosition;
+        Vector2 rightStartPos = panelRight.anchoredPosition;
 
-        panelLeft.DOAnchorPos(Vector2.zero, moveTime).SetEase(Ease.InOutSine);
-        panelRight.DOAnchorPos(Vector2.zero, moveTime).SetEase(Ease.InOutSine);
+        Sequence sequenceIn = DOTween.Sequence();
+        sequenceIn.Join(panelLeft.DOAnchorPos(Vector2.zero, moveTime).SetEase(Ease.InOutSine));
+        sequenceIn.Join(panelRight.DOAnchorPos(Vector2.zero, moveTime).SetEase(Ease.InOutSine));
+        yield return sequenceIn.WaitForCompletion();
 
-        yield return new WaitForSeconds(moveTime);
+        yield return new WaitForSeconds(waitInMiddle);
+
+        Sequence sequenceOut = DOTween.Sequence();
+        sequenceOut.Join(panelLeft.DOAnchorPos(leftStartPos, moveTime).SetEase(Ease.InOutSine));
+        sequenceOut.Join(panelRight.DOAnchorPos(rightStartPos, moveTime).SetEase(Ease.InOutSine));
+        yield return sequenceOut.WaitForCompletion();
+
+        panelLeft.gameObject.SetActive(false);
+        panelRight.gameObject.SetActive(false);
     }
 
     private IEnumerator HideTransitionPanels()
     {
-        float moveTime = 1f;
+        float moveTime = 0.8f;
 
-        panelLeft.DOAnchorPos(new Vector2(-Screen.width, 0), moveTime).SetEase(Ease.InOutSine);
-        panelRight.DOAnchorPos(new Vector2(Screen.width, 0), moveTime).SetEase(Ease.InOutSine);
+        float leftWidth = panelLeft.rect.width;
+        float rightWidth = panelRight.rect.width;
 
-        yield return new WaitForSeconds(moveTime);
+        Sequence sequence = DOTween.Sequence();
+        sequence.Join(panelLeft.DOAnchorPos(new Vector2(-leftWidth, 0), moveTime).SetEase(Ease.InOutSine));
+        sequence.Join(panelRight.DOAnchorPos(new Vector2(rightWidth, 0), moveTime).SetEase(Ease.InOutSine));
+
+        yield return sequence.WaitForCompletion();
 
         panelLeft.gameObject.SetActive(false);
         panelRight.gameObject.SetActive(false);
+    }
+
+    private IEnumerator LoadLevelInternal(int index)
+    {
+        currentLevel = Instantiate(levelPrefabs[index], Vector3.zero, Quaternion.identity);
+        currentLevelIndex = index;
+
+        Tilemap[] groundTilemaps = currentLevel.GetComponentsInChildren<Tilemap>().Where(t => t.gameObject.tag == "Ground").ToArray();
+        Tilemap[] wallTilemaps = currentLevel.GetComponentsInChildren<Tilemap>().Where(t => t.gameObject.tag == "Wall").ToArray();
+
+        if (snakeController != null)
+        {
+            snakeController.groundTilemaps = groundTilemaps;
+            snakeController.wallTilemaps = wallTilemaps;
+            snakeController.ResetSnake();
+        }
+
+        if (snakeParent == null)
+        {
+            snakeParent = GameObject.Find("SnakeParent") ?? new GameObject("SnakeParent");
+        }
+
+        snakeController.transform.position = Vector3.zero;
+
+        yield return new WaitForSeconds(0.5f);
+
+        yield return StartCoroutine(HideTransitionPanels());
+    }
+
+    private IEnumerator TransitionLoadLevel(int nextIndex)
+    {
+        if (currentLevel != null)
+        {
+            Destroy(currentLevel);
+            currentLevel = null;
+        }
+
+        yield return StartCoroutine(PlayTransitionPanels());
+
+        yield return StartCoroutine(LoadLevelInternal(nextIndex));
     }
 }
